@@ -12,23 +12,12 @@ Knowledge repository for learning GCP
 
 The following commands are to be used after attaching disk.
 
-To check the file system.
 ```bash
-lsblk
-```
-```bash
+lsblk  #To check the file system
 sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0 discard /dev/sdb
-```
-```bash
 sudo mkdir -p /mnt/data
-```
-```bash
 sudo mount -o discard,defaults /dev/sdb /mnt/data
-```
-```bash
 df -h
-```
-```bash
 sudo resize2fs /dev/sdb
 ```
 
