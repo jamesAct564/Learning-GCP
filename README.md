@@ -42,3 +42,62 @@ systemctl start apache2
 systemctl enable apache2
 HOSTNAME=$(hostname)
 echo "<html><body><h1>Hello from $HOSTNAME</h1><p>This page is served by VM: $HOSTNAME</p></body></html>" |tee /var/www/html/index.html
+```
+# Google Kubernetes Engine
+
+**Kubectl**: It is the official command line tool and it communicates with the Cluster's Control Plane Server.
+
+**Troubleshooting Commands**: 
+* When **kubectl get pods** shows an error, use **kubectl describe pod [pod-name]**.
+* You connect **kubectl** to a GKE Cluster by running the below command.
+```bash
+gcloud container clusters get-credentials --location[LOCATION]
+```
+
+* A __container__ is a standard, shippable package bundling code and all the dependencies required to run the application.
+
+## Building a simple python web application
+
+We will build a simple python application using the flask framework. Below given is the code of the same.
+
+```bash
+from flask import Flask
+import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Hello, World! This is my first GKE app"
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0',port=int(os.environ.get('PORT',8080)))
+```
+Then the requirements.txt. This file is simple as we only have to install the Flask dependency for this application.
+
+**requirements.txt**
+```bash
+flask
+```
+
+## Dockerfile
+
+Below given is a sample dockerfile to build a simple Python application.
+ ```bash
+ FROM python:3.11-slim
+
+ # Set the working directory in the container to /app
+ WORKDIR /app
+
+ # Copy the requirements file first to leverage Docker cache
+ COPY requirements.txt .
+
+ # Install any needed packages specified in the requirements.txt file
+ RUN pip install -r requirements.txt
+
+ # Copy the rest of the application's source code 
+ COPY . .
+
+ # Run app.py when the container launches
+ CMD ["python","app.py"]
+ ```
