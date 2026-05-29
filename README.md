@@ -90,3 +90,10 @@ Below given is a sample dockerfile to build a simple Python application.
  # Run app.py when the container launches
  CMD ["python","app.py"]
  ```
+
+The above three files namely **app.py**, **requirements.txt** and *Dockerfile** are required to successfully run the web application.
+Now we have to containerize and package the above three files. This is done using the below command.
+
+```bash
+docker build . -t my-app:v1
+```
