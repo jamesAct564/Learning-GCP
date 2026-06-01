@@ -109,41 +109,63 @@ It is a service in GCP used to store, manage and securely build artifacts like c
 ## Commands for creating repository
 
 * Creation of repo requires location of region and repo format.
-```bash
-# gcloud artifacts repositories create [REPO-NAME] --repository-format=[any containerization platform] --location=us-central1 --description="My first container image repo"
+    ```bash
+    # gcloud artifacts repositories create [REPO-NAME] --repository-format=[any containerization platform] --location=us-central1 --description="My first container image repo"
 
-gcloud artifacts repositories create my-app-repo --repository-format=docker --location=us-central1 --description="My first container image repo"
-```
+    gcloud artifacts repositories create my-app-repo --repository-format=docker --location=us-central1 --description="My first container image repo"
+    ```
 * Then use the below command to configure Docker so it can authenticate with Google Artifact Registry
-```bash
-gcloud auth configure-docker us-central1-docker.pkg.dev
-```
+    ```bash
+    gcloud auth configure-docker us-central1-docker.pkg.dev
+    ```
 * Then use the below command to tag a local Docker image with a new name that points to a repository present in Google Artifact Registry.
-```bash
-docker tag my-app:v1 us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
-```
+    ```bash
+    docker tag my-app:v1 us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
+    ```
 * Then use the below command to push the locally built image to the repository created in the Google Artifact Registry.
-```bash
-docker push us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
-```
+    ```bash
+    docker push us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
+    ```
 
 **Kubernetes** is used to deploy the application using the created image and expose it to different levels.
 Below are some of the commands used to deploy the services using K8s.
 * The below command is used to create a Kubernetes deployment.
-```bash
-kubectl create deployment hello-app --image=us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
-```
+    ```bash
+    kubectl create deployment hello-app --image=us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
+    ```
 * There are three types of service types used to deploy services in Kubernetes.\
  1] **ClusterIP**: This is the default selection. Gives the service a stable IP inside the Kubernetes cluster. It is perfect for internal backend services like a database etc.\
  2] **NodePort**: Exposes the service on a static port on each node's IP. It is mostly used for debugging, and not in production.\
  3] **LoadBalancer**: Exposes the service to the public internet.
 
 * The below command exposes the deployment to the public internet using the LoadBalancer service type.
-```bash
-kubectl expose deployment hello-app --type=LoadBalancer --port=80 --target-port=8080
-```
+    ```bash
+    kubectl expose deployment hello-app --type=LoadBalancer --port=80 --target-port=8080
+    ```
 * The below commands are useful to check the details of the deployed services.
-```bash
-kubectl get svc # gets info of all the services
-kubectl get services hello-app # gets info of any particular service
-```
+    ```bash
+    kubectl get svc # gets info of all the services
+    kubectl get services hello-app # gets info of any particular service
+    ```
+
+* There is an alternative way to push images into repositories using DockerHub.\
+ DockerHub is a global open source service that contains repositories hosting images. It is accessible using all different cloud providers.\
+ Firstly one has to create an account on DockerHub and have note of the credentials which will be later used to authenticate.\
+ Below given are the commands of the same.
+    ```bash
+    docker build . -t sh1reesh2003/my-app:v2
+
+    docker login [enter required credentials]
+
+    docker push sh1reesh2003/my-app:v2
+
+    kubectl create deployment my-app --image=sh1reesh2003/my-app:v2
+
+    kubectl expose deployment my-app --type=LoadBalancer --port=80 --target-port=8080
+    ```
+
+ * If there are some changes to be made in the build config. Make the changes, save them and rebuild the docker image with a new version.\
+   Then use the below command to change the image.
+   ```bash
+   kubectl set image deployment/hello-app my-app=sh1reesh2003/my-app:v2
+   ```
