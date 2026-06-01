@@ -97,3 +97,11 @@ Now we have to containerize and package the above three files. This is done usin
 ```bash
 docker build . -t my-app:v1
 ```
+
+# Google Artifact Repository
+It is a service in GCP used to store, manage and securely build artifacts like container images and packages.
+
+## Assignment of roles for least privilege
+* __Artifact Registry Reader__: Used in GKE, Cloud Run. The purpose is to pull images from the repository.
+* __Artifact Registry Writer__: Used in Cloud Build and by developers creating images. The purpose is to push images to the repository after creation.
+* __Artifact Registry Admin__: Used by DevOps Admins. The purpose of this role is to manage the repositories.
