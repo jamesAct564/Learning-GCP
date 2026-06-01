@@ -127,6 +127,62 @@ It is a service in GCP used to store, manage and securely build artifacts like c
     docker push us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
     ```
 
+* We can also update the image by changing the source code of the app.py file. It is mentioned below.
+  ```bash
+    from flask import Flask
+    import os
+
+    app = Flask(__name__)
+
+    @app.route('/')
+    def hello():
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>My GKE App</title>
+            <style>
+                body {
+                    margin: 0;
+                    height: 100vh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: #0b3d91; /* dark blue */
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+                .box {
+                    background-color: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0px 4px 20px rgba(0,0,0,0.3);
+                    text-align: center;
+                    color: #0b3d91;
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="box">
+                Hello world! This is my first GKE app
+            </div>
+        </body>
+        </html>
+        """
+
+    if __name__ == "__main__":
+        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    ```
+* Build the image again and give out a new version number this time around to create the new edits.
+  ```bash
+  docker build . -t my-app:v2
+  ```
+* Also tag the image appropriately according the version number to correctly push it to the repository.
+  ```bash
+  docker tag my-app:v2 us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v2
+  ```
+
 **Kubernetes** is used to deploy the application using the created image and expose it to different levels.
 Below are some of the commands used to deploy the services using K8s.
 * The below command is used to create a Kubernetes deployment.
