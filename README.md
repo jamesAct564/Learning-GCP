@@ -126,3 +126,24 @@ docker tag my-app:v1 us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-rep
 ```bash
 docker push us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
 ```
+
+**Kubernetes** is used to deploy the application using the created image and expose it to different levels.
+Below are some of the commands used to deploy the services using K8s.
+* The below command is used to create a Kubernetes deployment.
+```bash
+kubectl create deployment hello-app --image=us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/my-app-repo/my-app:v1
+```
+* There are three types of service types used to deploy services in Kubernetes.\
+ 1] **ClusterIP**: This is the default selection. Gives the service a stable IP inside the Kubernetes cluster. It is perfect for internal backend services like a database etc.\
+ 2] **NodePort**: Exposes the service on a static port on each node's IP. It is mostly used for debugging, and not in production.\
+ 3] **LoadBalancer**: Exposes the service to the public internet.
+
+* The below command exposes the deployment to the public internet using the LoadBalancer service type.
+```bash
+kubectl expose deployment hello-app --type=LoadBalancer --port=80 --target-port=8080
+```
+* The below commands are useful to check the details of the deployed services.
+```bash
+kubectl get svc # gets info of all the services
+kubectl get services hello-app # gets info of any particular service
+```
