@@ -225,3 +225,98 @@ Below are some of the commands used to deploy the services using K8s.
    ```bash
    kubectl set image deployment/hello-app my-app=sh1reesh2003/my-app:v2
    ```
+
+# Google Cloud Storage
+
+## Definition
+It is a managed service for storing unstructured data in the form of objects in buckets.
+**Bucket**: A top-level container used to store your data.
+ * It holds objects(data).
+ * It needs to have a globally unique name.
+ * It needs to be associated with a location.
+ * It controls access permissions and policies.
+
+**Object**: It is the actual file/data stored inside a bucket.
+ * Contains filedata, metadata etc
+
+**Uniform Bucket Level Access**: This is a feature present for 90 days before it becomes permanent and once that happens, it cannot be reverted.
+
+**Soft delete**: New buckets have this enabled by default. This comes with a 7 day retention period and it allows you to restore objects. 
+**NOTE**: You cannot edit an object in-place. You have to upload a new version to overwrite it.
+
+## Google Cloud Storage Commands
+
+* The below command is used to create a new bucket in a particular location
+  ```bash
+  gcloud storage buckets create gs://NAME --location=us-central1
+  ```
+* The below commands are used to create a file and copy it to the GCS.
+    ```bash
+    echo "Hello cloud storage" > file1.txt
+    gcloud storage cp file1.txt gs://BUCKET-NAME/
+    ```
+* The below command is used to view contents of the Google Cloud Storage bucket.
+    ```bash
+    gcloud storage ls gs://BUCKET-NAME/
+    ```
+* The below set of commands are used to demonstrate the working of remote sync in GCS.
+    ```bash
+    # Create a directory 
+    mkdir my-data 
+
+    # Create two files inside the directory
+    echo "file a" > my-data/a.txt
+    echo "file b" > my-data/b.txt
+
+    #Then use rsync which does remote sync and adds the entire directory as backup into the bucket in GCS
+    gcloud storage rsync my-data gs://BUCKET-NAME/backup --recursive
+
+    # --recursive flag is used to tell the CLI to copy the folder and everything inside it.
+
+    # Delete a file locally and perform the rsync once again after deleting.
+    rm my-data/a.txt
+
+    # The file is deleted locally but there is still a copy in the backup. To delete the backup copy, use the rsync command once again with a new flag
+
+    gcloud storage rsync my-data gs://BUCKET_NAME/backup --recursive --delete-unmatched-destination-objects
+
+    # The delete-unmatched-destination-objects flag picks up the objects that are not present in the source after comparing and then deletes them in the backup
+    ```
+
+## Object Lifecycle Management
+
+It is a feature in Google Cloud Storage that lets you automatically manage objects over time based on the rules one is defining.
+
+Steps to do using CLI are as follows:
+* Create a file named **lifecycle.json** and enter the required rules in proper json format as shown below.
+    ```bash
+        {
+            "rule": [
+            {
+                "action": {
+                "type": "SetStorageClass",
+                "storageClass": "NEARLINE"
+            },
+            "condition": {
+                "age": 30
+            }
+        },
+        {
+            "action": {
+            "type": "Delete"
+        },
+        "condition": {
+            "age": 365
+            }
+        }
+      ]
+    }
+    ```
+* Then use the below commands to update the rules.
+    ```bash
+    gcloud storage buckets update gs://BUCKET-NAME --lifecycle-file=lifecycle.json
+    ```
+* The below command is used to check the content of the json file created after updating it.
+    ```bash
+    gcloud storage buckets describe gs://BUCKET-NAME --format="default(lifecycle_config)"
+    ```
